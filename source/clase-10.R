@@ -32,19 +32,23 @@ browseURL("https://adv-r.hadley.nz/conditions.html")
 
 ## Ejemplo
 unir <- function(x, y){
-        palabra = paste0(x," - ",y) %>% toupper()
+        palabra = paste0(x," ",y) %>% toupper()
         message(paste("message: las combinacion de las palabras producen:", palabra))
 }
 unir(x = "hola", y = "clase")
+unir(x = "hola", y="a todos")
 
 ## Veamos otro ejemplo (...)
 remove_na <- function(x) x = ifelse(is.na(x)==T,0,x)
 
 vector <- c(1:5,rep(NA,5),11:15)
+vector
 
-vector
-vector <- remove_na(x = vector)
-vector
+vector_2 = ifelse(is.na(vector)==T,0,vector)
+vector_2
+
+vector_3 <- remove_na(x = vector)
+vector_3
 
 ## Veamos otro ejemplo (...)
 storms %>% head()
@@ -57,9 +61,11 @@ summary(df$tropicalstorm_force_diameter)
 ## replace NA por 0
 df <- df %>% 
       mutate(tropicalstorm_force_diameter = remove_na(tropicalstorm_force_diameter))
-
 summary(df$tropicalstorm_force_diameter)
 
+df <- df %>% 
+  mutate(new_var = remove_na(tropicalstorm_force_diameter))
+summary(df$new_var)
 ## Veamos otro ejemplo: funcion que regresa el producto de un numero por si mismo
 num_2 <- function(x){
          c = x*x
@@ -85,6 +91,27 @@ num_2 <- function(numero){
 num_2(numero = 10)
 num_2(numero = "hola")
 num_2(numero = "10")
+
+##Crear funcion devolver raiz(sqrt) si es possible
+raiz_2 <- function(numero){
+  
+  if (is.numeric(numero) & numero>0){
+    r = sqrt(numero)
+    return(r)
+  }
+  
+  if (numero<=0){
+    warning(paste0(numero," no se puede calcular"))
+  }
+  
+  if (is.numeric(numero)==F){
+    warning(paste0(numero," no es un número"))
+  }
+}
+
+raiz_2(numero=4)
+raiz_2(numero=-100)
+raiz_2(numero= "hola")
 
 ## **[2.] Apply, Lapply & Sappl**
 
@@ -131,15 +158,16 @@ list.files("input/chip",full.names=T, recursive = T)
 paths <- list.files("input/chip",full.names=T, recursive = TRUE) %>% unlist()
 
 ## 2. Hacer ejemplo para una observacion
+data=import(input/chip/2019/)
 
 ## 2.1. leer archivo
-
+name_mpio = colnames(data)[1]
 
 ## 2.2. obtener codigo-DANE 
-
+tipo=data[8,2]
 
 ## 2.3. obtener tipo de inversion
-
+valor =data[8,2]
 
 ## 2.4. obtener valor
 
@@ -149,25 +177,30 @@ paths <- list.files("input/chip",full.names=T, recursive = TRUE) %>% unlist()
 
 #----------------------#
 ## 3. Generalizar ejemplo en una función
-f_extrac <- function(path,tipo_rubro){
+f_extrac <- function(ruta){
   
             ## 3.1. leer archivo
-            
+            data=import(ruta)
             
             ## 3.2. obtener codigo-DANE 
-            
+            name_mpio=colnames(data)[1]
             
             ## 3.3. obtener tipo de inversion
-            
+            tipo=data[8,8]
             
             ## 3.4. obtener valor
-            
+            valor=data[8,8]
             
             ## 3.5. consolidar informacion 
-            
+            df=tibble(name=name_mpio, tipo_inver=tipo, valor_inv=valor)
             
             ## 3.6 Retornar output
+            return(df)
   
 }
 
+lista=list.files("input/chip",recursive = T, full.names = T)
 
+data_lapply=lapply(lista, function(x) f_extrac(ruta=x))
+
+data_df= rbindlist(l=data_lapply, use.names = T)
